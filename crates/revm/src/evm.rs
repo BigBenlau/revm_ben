@@ -95,7 +95,9 @@ impl<DB: Database> EVM<DB> {
 
     /// Execute transaction without writing to DB, return change state.
     pub fn transact(&mut self) -> EVMResult<DB::Error> {
+        println!("revm transact");
         if let Some(db) = self.db.as_mut() {
+            println!("db: {}", db);
             evm_inner::<DB, false>(&mut self.env, db, &mut NoOpInspector).transact()
         } else {
             panic!("Database needs to be set");
