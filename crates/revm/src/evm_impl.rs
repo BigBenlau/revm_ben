@@ -16,6 +16,7 @@ use core::{cmp::min, marker::PhantomData};
 use revm_interpreter::gas::initial_tx_gas;
 use revm_interpreter::MAX_CODE_SIZE;
 use revm_precompile::{Precompile, Precompiles};
+use tracing::info;
 
 pub struct EVMData<'a, DB: Database> {
     pub env: &'a mut Env,
@@ -709,6 +710,8 @@ impl<'a, GSPEC: Spec, DB: Database, const INSPECT: bool> EVMImpl<'a, GSPEC, DB, 
             Ok(o) => o,
             Err(e) => return e,
         };
+
+        println!("call_inner start.");
 
         let ret = if is_precompile(inputs.contract, self.data.precompiles.len()) {
             self.call_precompile(inputs, prepared_call.gas)
