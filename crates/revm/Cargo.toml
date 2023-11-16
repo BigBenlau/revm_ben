@@ -20,6 +20,9 @@ auto_impl = { version = "1.1", default-features = false }
 serde = { version = "1.0", features = ["derive", "rc"], optional = true }
 serde_json = { version = "1.0", features = ["preserve_order"], optional = true }
 
+# tracing
+tracing.workspace = true
+
 # ethersdb
 tokio = { version = "1.32", features = [
     "rt-multi-thread",

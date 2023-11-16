@@ -3,6 +3,10 @@ resolver = "2"
 members = ["bins/*", "crates/*"]
 default-members = ["crates/revm"]
 
+[workspace.dependencies]
+tracing = "0.1.0"
+tracing-appender = "0.2"
+
 [profile.release]
 lto = true
 codegen-units = 1
