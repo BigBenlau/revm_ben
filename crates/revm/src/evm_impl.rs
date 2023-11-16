@@ -296,6 +296,12 @@ impl<'a, GSPEC: Spec, DB: Database, const INSPECT: bool> EVMImpl<'a, GSPEC, DB, 
                     min(gas.refunded() as u64, gas.spend() / max_refund_quotient)
                 };
 
+                info!(
+                    target: "evm_impl",
+                    ?self.data,
+                    "evm_impl finalized"
+                );
+
                 // return balance of not spend gas.
                 let Ok((caller_account, _)) =
                     self.data.journaled_state.load_account(caller, self.data.db)
