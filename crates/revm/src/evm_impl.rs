@@ -296,12 +296,6 @@ impl<'a, GSPEC: Spec, DB: Database, const INSPECT: bool> EVMImpl<'a, GSPEC, DB, 
                     min(gas.refunded() as u64, gas.spend() / max_refund_quotient)
                 };
 
-                info!(
-                    target: "evm_impl",
-                    ?self.data,
-                    "evm_impl finalized"
-                );
-
                 // return balance of not spend gas.
                 let Ok((caller_account, _)) =
                     self.data.journaled_state.load_account(caller, self.data.db)
@@ -827,6 +821,15 @@ impl<'a, GSPEC: Spec, DB: Database + 'a, const INSPECT: bool> Host
 
     fn sload(&mut self, address: B160, index: U256) -> Option<(U256, bool)> {
         // account is always hot. reference on that statement https://eips.ethereum.org/EIPS/eip-2929 see `Note 2:`
+        println!("evm impl sload arrived.");
+
+        sload_journaled_state = self.data.journaled_state;
+        info!(
+            target: "evm_impl",
+            ?data_info,
+            "evm_impl sload"
+        );
+
         self.data
             .journaled_state
             .sload(address, index, self.data.db)
@@ -840,6 +843,7 @@ impl<'a, GSPEC: Spec, DB: Database + 'a, const INSPECT: bool> Host
         index: U256,
         value: U256,
     ) -> Option<(U256, U256, U256, bool)> {
+        println!("evm impl sstore arrived.");
         self.data
             .journaled_state
             .sstore(address, index, value, self.data.db)
