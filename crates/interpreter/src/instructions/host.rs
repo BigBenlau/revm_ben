@@ -138,6 +138,8 @@ pub fn blockhash<H: Host>(interpreter: &mut Interpreter, host: &mut H) {
 pub fn sload<H: Host, SPEC: Spec>(interpreter: &mut Interpreter, host: &mut H) {
     pop!(interpreter, index);
 
+    println!("revm opcode sload");
+
     let Some((value, is_cold)) = host.sload(interpreter.contract.address, index) else {
         interpreter.instruction_result = InstructionResult::FatalExternalError;
         return;
@@ -148,6 +150,8 @@ pub fn sload<H: Host, SPEC: Spec>(interpreter: &mut Interpreter, host: &mut H) {
 
 pub fn sstore<H: Host, SPEC: Spec>(interpreter: &mut Interpreter, host: &mut H) {
     check_staticcall!(interpreter);
+
+    println!("revm opcode sstore");
 
     pop!(interpreter, index, value);
     let Some((original, old, new, is_cold)) =
