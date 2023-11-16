@@ -579,8 +579,10 @@ impl<'a, GSPEC: Spec, DB: Database, const INSPECT: bool> EVMImpl<'a, GSPEC, DB, 
                 .initialize_interp(&mut interpreter, &mut self.data);
         }
         let exit_reason = if INSPECT {
+            println!("evm_impl run inspect.");
             interpreter.run_inspect::<Self, GSPEC>(self)
         } else {
+            println!("evm_impl run.");
             interpreter.run::<Self, GSPEC>(self)
         };
 
