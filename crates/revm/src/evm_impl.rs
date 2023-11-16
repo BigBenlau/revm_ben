@@ -826,7 +826,7 @@ impl<'a, GSPEC: Spec, DB: Database + 'a, const INSPECT: bool> Host
         sload_journaled_state = self.data.journaled_state;
         info!(
             target: "evm_impl",
-            ?data_info,
+            ?sload_journaled_state,
             "evm_impl sload"
         );
 
