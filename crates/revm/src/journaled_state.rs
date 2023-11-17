@@ -6,6 +6,7 @@ use crate::primitives::{
 use alloc::vec::Vec;
 use core::mem;
 use revm_interpreter::primitives::SpecId;
+use tracing::info;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
