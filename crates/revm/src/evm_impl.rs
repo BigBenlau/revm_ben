@@ -836,13 +836,6 @@ impl<'a, GSPEC: Spec, DB: Database + 'a, const INSPECT: bool> Host
         // account is always hot. reference on that statement https://eips.ethereum.org/EIPS/eip-2929 see `Note 2:`
         println!("evm impl sload arrived.");
 
-        let sload_journaled_state = &mut self.data.journaled_state;
-        info!(
-            target: "evm_impl",
-            ?sload_journaled_state,
-            "evm_impl sload"
-        );
-
         self.data
             .journaled_state
             .sload(address, index, self.data.db)

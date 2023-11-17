@@ -238,7 +238,7 @@ impl JournaledState {
     /// 4. Add fund to created account
     /// 5. Increment nonce of created account if SpuriousDragon is active
     /// 6. Decrease balance of caller account.
-    ///  
+    ///
     /// Safety: It is assumed that caller balance is already checked and that
     /// caller is already loaded inside evm. This is already done inside `create_inner`
     pub fn create_account_checkpoint<SPEC: Spec>(
@@ -657,6 +657,12 @@ impl JournaledState {
                 let value = if is_newly_created {
                     U256::ZERO
                 } else {
+
+                    info!(
+                        target: "journaled_state",
+                        ?db,
+                        "Journaled state database"
+                    );
                     db.storage(address, key)?
                 };
                 // add it to journal as cold loaded.
