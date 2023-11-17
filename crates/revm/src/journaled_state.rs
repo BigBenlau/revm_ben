@@ -658,12 +658,6 @@ impl JournaledState {
                 let value = if is_newly_created {
                     U256::ZERO
                 } else {
-
-                    info!(
-                        target: "journaled_state",
-                        ?db,
-                        "Journaled state database"
-                    );
                     db.storage(address, key)?
                 };
                 // add it to journal as cold loaded.
