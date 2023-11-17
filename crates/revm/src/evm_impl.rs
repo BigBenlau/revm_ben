@@ -179,6 +179,7 @@ impl<'a, GSPEC: Spec, DB: Database, const INSPECT: bool> Transact<DB::Error>
                 // Nonce is already checked
                 caller_account.info.nonce = caller_account.info.nonce.saturating_add(1);
 
+                println!("evm_impl preverified start call function");
                 let (exit, gas, bytes) = self.call(&mut CallInputs {
                     contract: address,
                     transfer: Transfer {
@@ -200,6 +201,7 @@ impl<'a, GSPEC: Spec, DB: Database, const INSPECT: bool> Transact<DB::Error>
                 (exit, gas, Output::Call(bytes))
             }
             TransactTo::Create(scheme) => {
+                println!("evm_impl preverified start create function");
                 let (exit, address, ret_gas, bytes) = self.create(&mut CreateInputs {
                     caller: tx_caller,
                     scheme,
@@ -228,7 +230,7 @@ impl<'a, GSPEC: Spec, DB: Database, const INSPECT: bool> Transact<DB::Error>
                 _ => {}
             }
         }
-
+        println!("evm_impl preverified start finalized function");
         let (state, logs, gas_used, gas_refunded) = self.finalize::<GSPEC>(&gas);
 
         let result = match exit_reason.into() {
