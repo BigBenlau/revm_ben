@@ -54,6 +54,7 @@ impl BundleAccount {
     ///
     /// In case we know that account is destroyed return `Some(U256::ZERO)`
     pub fn storage_slot(&self, slot: U256) -> Option<U256> {
+        println!("REVM bundle account show slot {}", &slot);
         let slot = self.storage.get(&slot).map(|s| s.present_value);
         if slot.is_some() {
             slot
