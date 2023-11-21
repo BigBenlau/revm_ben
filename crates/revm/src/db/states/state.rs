@@ -241,6 +241,7 @@ impl<DB: Database> Database for State<DB> {
     fn storage(&mut self, address: B160, index: U256) -> Result<U256, Self::Error> {
         // Account is guaranteed to be loaded.
         // Note that storage from bundle is already loaded with account.
+        println!("evm state storage!!");
         if let Some(account) = self.cache.accounts.get_mut(&address) {
             // account will always be some, but if it is not, U256::ZERO will be returned.
             let is_storage_known = account.status.storage_known();
@@ -293,6 +294,7 @@ impl<DB: Database> Database for State<DB> {
 
 impl<DB: Database> DatabaseCommit for State<DB> {
     fn commit(&mut self, evm_state: HashMap<B160, Account>) {
+        println!("evm state commit!!");
         let transitions = self.cache.apply_evm_state(evm_state);
         self.apply_transition(transitions);
     }
