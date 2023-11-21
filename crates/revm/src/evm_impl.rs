@@ -274,12 +274,6 @@ impl<'a, GSPEC: Spec, DB: Database, const INSPECT: bool> EVMImpl<'a, GSPEC, DB, 
 
         let journaled_state = JournaledState::new(precompiles.len(), GSPEC::SPEC_ID);
 
-        info!(
-            target: "evm_impl",
-            ?journaled_state,
-            "evm_impl new joural"
-        );
-
         Self {
             data: EVMData {
                 env,
