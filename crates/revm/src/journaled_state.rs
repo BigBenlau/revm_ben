@@ -1,3 +1,4 @@
+use crate::db::states::account_status;
 use crate::interpreter::{inner_models::SelfDestructResult, InstructionResult};
 use crate::primitives::{
     db::Database, hash_map::Entry, Account, Bytecode, HashMap, Log, Spec, SpecId::*, State,
@@ -651,7 +652,15 @@ impl JournaledState {
         let account = self.state.get_mut(&address).unwrap(); // assume acc is hot
                                                              // only if account is created in this tx we can assume that storage is empty.
         let is_newly_created = account.is_created();
+
         println!("revm journaled state sload(), address: {:?}, key: {:?}", address, key);
+        let account_storage = account.storage;
+        info!{
+            target: "revm",
+            ?account_storage,
+            "Journaled State account.storage"
+        }
+
         let load = match account.storage.entry(key) {
             Entry::Occupied(occ) => (occ.get().present_value, false),
             Entry::Vacant(vac) => {
