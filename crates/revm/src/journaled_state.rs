@@ -651,6 +651,7 @@ impl JournaledState {
         let account = self.state.get_mut(&address).unwrap(); // assume acc is hot
                                                              // only if account is created in this tx we can assume that storage is empty.
         let is_newly_created = account.is_created();
+        println!("revm journaled state sload(), address: {:?}, key: {:?}", address, key);
         let load = match account.storage.entry(key) {
             Entry::Occupied(occ) => (occ.get().present_value, false),
             Entry::Vacant(vac) => {
