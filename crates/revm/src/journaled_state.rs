@@ -654,7 +654,7 @@ impl JournaledState {
         let is_newly_created = account.is_created();
 
         println!("revm journaled state sload(), address: {:?}, key: {:?}", address, key);
-        let account_storage = account.storage;
+        let account_storage = &account.storage;
         info!{
             target: "revm",
             ?account_storage,
