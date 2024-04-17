@@ -15,8 +15,8 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
 # revm
-revm-interpreter = { path = "../interpreter", version = "4.0.0", default-features = false }
-revm-precompile = { path = "../precompile", version = "6.0.0", default-features = false }
+revm-interpreter = { path = "../interpreter", version = "4.0.1", default-features = false }
+revm-precompile = { path = "../precompile", version = "6.0.1", default-features = false }
 
 # misc
 auto_impl = { version = "1.2", default-features = false }
