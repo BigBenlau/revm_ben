@@ -93,6 +93,7 @@ pub fn output<EXT, DB: Database>(
             gas_refunded,
             logs,
             output,
+            ..
         },
         SuccessOrHalt::Revert => ExecutionResult::Revert {
             gas_used: final_gas_used,
