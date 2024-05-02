@@ -5,6 +5,7 @@ use crate::{
     },
     Context, FrameResult,
 };
+use std::collections::HashMap;
 
 /// Mainnet end handle does not change the output.
 #[inline]
@@ -93,7 +94,8 @@ pub fn output<EXT, DB: Database>(
             gas_refunded,
             logs,
             output,
-            ..
+            total_op_count: HashMap::new(),
+            total_time: HashMap::new()
         },
         SuccessOrHalt::Revert => ExecutionResult::Revert {
             gas_used: final_gas_used,

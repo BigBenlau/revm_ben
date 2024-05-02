@@ -31,7 +31,6 @@ pub enum ExecutionResult {
         output: Output,
         total_op_count: HashMap<String, u64>,
         total_time: HashMap<String, u64>
-
     },
     /// Reverted by `REVERT` opcode that doesn't spend all gas.
     Revert { gas_used: u64, output: Bytes },
