@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.0](https://github.com/BigBenlau/revm_ben/compare/revm-primitives-v3.1.1...revm-primitives-v4.0.0) - 2024-05-02
+
+### Fixed
+- fixed bugs in post_execution.rs
+
+### Other
+- update exectutionResult structure add total_op_count and total_time
+
 ## [3.1.1](https://github.com/bluealloy/revm/compare/revm-primitives-v3.1.0...revm-primitives-v3.1.1) - 2024-04-02
 
 ### Fixed

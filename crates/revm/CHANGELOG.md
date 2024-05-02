@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.0.1](https://github.com/BigBenlau/revm_ben/compare/revm-v8.0.0...revm-v8.0.1) - 2024-05-02
+
+### Fixed
+- fixed bugs in post_execution.rs
+- fixed bugs
+
+### Other
+- add log in transact()
+
 ## [8.0.0](https://github.com/bluealloy/revm/compare/revm-v7.2.0...revm-v8.0.0) - 2024-04-02
 
 ### Added
