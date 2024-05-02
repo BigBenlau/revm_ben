@@ -1,6 +1,7 @@
 use crate::{Address, Bytes, Log, State, U256};
 use core::fmt;
 use std::{boxed::Box, string::String, vec::Vec};
+use std::collections::HashMap;
 
 /// Result of EVM execution.
 pub type EVMResult<DBError> = EVMResultGeneric<ResultAndState, DBError>;
@@ -18,7 +19,7 @@ pub struct ResultAndState {
 }
 
 /// Result of a transaction execution.
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ExecutionResult {
     /// Returned successfully
@@ -28,6 +29,9 @@ pub enum ExecutionResult {
         gas_refunded: u64,
         logs: Vec<Log>,
         output: Output,
+        total_op_count: HashMap<String, u64>,
+        total_time: HashMap<String, u64>
+
     },
     /// Reverted by `REVERT` opcode that doesn't spend all gas.
     Revert { gas_used: u64, output: Bytes },
