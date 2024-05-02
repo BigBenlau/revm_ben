@@ -13,6 +13,7 @@ mod bytecode;
 mod constants;
 pub mod db;
 pub mod env;
+
 #[cfg(feature = "c-kzg")]
 pub mod kzg;
 pub mod precompile;
@@ -30,7 +31,7 @@ pub use constants::*;
 pub use env::*;
 
 cfg_if::cfg_if! {
-    if #[cfg(feature = "std")] {
+    if #[cfg(all(not(feature = "hashbrown"), feature = "std"))] {
         pub use std::collections::{hash_map, hash_set, HashMap, HashSet};
         use hashbrown as _;
     } else {

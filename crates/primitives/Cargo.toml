@@ -53,6 +53,7 @@ std = [
     "bitvec/std",
     "bitflags/std",
 ]
+hashbrown = []
 serde = [
     "dep:serde",
     "alloy-primitives/serde",
@@ -87,6 +88,7 @@ optional_eip3607 = []
 optional_gas_refund = []
 optional_no_base_fee = []
 optional_beneficiary_reward = []
+rand = ["alloy-primitives/rand"]
 
 # See comments in `revm-precompile`
 c-kzg = ["dep:c-kzg", "dep:once_cell", "dep:derive_more"]

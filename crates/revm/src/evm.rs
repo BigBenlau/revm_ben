@@ -3,8 +3,8 @@ use crate::{
     db::{Database, DatabaseCommit, EmptyDB},
     handler::Handler,
     interpreter::{
-        opcode::InstructionTables, Host, Interpreter, InterpreterAction, SStoreResult,
-        SelfDestructResult, SharedMemory,
+        opcode::InstructionTables, Host, Interpreter, InterpreterAction, LoadAccountResult,
+        SStoreResult, SelfDestructResult, SharedMemory,
     },
     primitives::{
         specification::SpecId, Address, BlockEnv, Bytecode, CfgEnv, EVMError, EVMResult, Env,
@@ -88,14 +88,14 @@ impl<EXT, DB: Database> Evm<'_, EXT, DB> {
     /// has enough balance to pay for the gas.
     #[inline]
     pub fn preverify_transaction(&mut self) -> Result<(), EVMError<DB::Error>> {
-        self.handler.validation().env(&self.context.evm.env)?;
-        self.handler
-            .validation()
-            .initial_tx_gas(&self.context.evm.env)?;
-        self.handler
-            .validation()
-            .tx_against_state(&mut self.context)?;
-        Ok(())
+        let output = self.preverify_transaction_inner().map(|_| ());
+        self.clear();
+        output
+    }
+
+    /// Calls clear handle of post execution to clear the state for next execution.
+    fn clear(&mut self) {
+        self.handler.post_execution().clear(&mut self.context);
     }
 
     /// Transact pre-verified transaction
@@ -106,9 +106,45 @@ impl<EXT, DB: Database> Evm<'_, EXT, DB> {
         let initial_gas_spend = self
             .handler
             .validation()
-            .initial_tx_gas(&self.context.evm.env)?;
+            .initial_tx_gas(&self.context.evm.env)
+            .map_err(|e| {
+                self.clear();
+                e
+            })?;
         let output = self.transact_preverified_inner(initial_gas_spend);
-        self.handler.post_execution().end(&mut self.context, output)
+        let output = self.handler.post_execution().end(&mut self.context, output);
+        self.clear();
+        output
+    }
+
+    /// Pre verify transaction inner.
+    #[inline]
+    fn preverify_transaction_inner(&mut self) -> Result<u64, EVMError<DB::Error>> {
+        self.handler.validation().env(&self.context.evm.env)?;
+        let initial_gas_spend = self
+            .handler
+            .validation()
+            .initial_tx_gas(&self.context.evm.env)?;
+        self.handler
+            .validation()
+            .tx_against_state(&mut self.context)?;
+        Ok(initial_gas_spend)
+    }
+
+    /// Transact transaction
+    ///
+    /// This function will validate the transaction.
+    #[inline]
+    pub fn transact(&mut self) -> EVMResult<DB::Error> {
+        let initial_gas_spend = self.preverify_transaction_inner().map_err(|e| {
+            self.clear();
+            e
+        })?;
+
+        let output = self.transact_preverified_inner(initial_gas_spend);
+        let output = self.handler.post_execution().end(&mut self.context, output);
+        self.clear();
+        output
     }
 
     /// Returns the reference of handler configuration
@@ -163,24 +199,6 @@ impl<EXT, DB: Database> Evm<'_, EXT, DB> {
     #[inline]
     pub fn block_mut(&mut self) -> &mut BlockEnv {
         &mut self.context.evm.env.block
-    }
-
-    /// Transact transaction
-    ///
-    /// This function will validate the transaction.
-    #[inline]
-    pub fn transact(&mut self) -> EVMResult<DB::Error> {
-        self.handler.validation().env(&self.context.evm.env)?;
-        let initial_gas_spend = self
-            .handler
-            .validation()
-            .initial_tx_gas(&self.context.evm.env)?;
-        self.handler
-            .validation()
-            .tx_against_state(&mut self.context)?;
-
-        let output = self.transact_preverified_inner(initial_gas_spend);
-        self.handler.post_execution().end(&mut self.context, output)
     }
 
     /// Modify spec id, this will create new EVM that matches this spec id.
@@ -266,7 +284,7 @@ impl<EXT, DB: Database> Evm<'_, EXT, DB> {
 
             // take error and break the loop if there is any.
             // This error is set From Interpreter when it's interacting with Host.
-            core::mem::replace(&mut self.context.evm.error, Ok(()))?;
+            self.context.evm.take_error()?;
             // take shared memory back.
             shared_memory = interpreter.take_memory();
 
@@ -274,6 +292,9 @@ impl<EXT, DB: Database> Evm<'_, EXT, DB> {
             let frame_or_result = match next_action {
                 InterpreterAction::Call { inputs } => exec.call(&mut self.context, inputs)?,
                 InterpreterAction::Create { inputs } => exec.create(&mut self.context, inputs)?,
+                InterpreterAction::EOFCreate { inputs } => {
+                    exec.eofcreate(&mut self.context, inputs)?
+                }
                 InterpreterAction::Return { result } => {
                     // free memory context.
                     shared_memory.free_context();
@@ -292,6 +313,10 @@ impl<EXT, DB: Database> Evm<'_, EXT, DB> {
                         Frame::Create(frame) => {
                             // return_create
                             FrameResult::Create(exec.create_return(ctx, frame, result)?)
+                        }
+                        Frame::EOFCreate(frame) => {
+                            // return_eofcreate
+                            FrameResult::EOFCreate(exec.eofcreate_return(ctx, frame, result)?)
                         }
                     })
                 }
@@ -321,6 +346,10 @@ impl<EXT, DB: Database> Evm<'_, EXT, DB> {
                         FrameResult::Create(outcome) => {
                             // return_create
                             exec.insert_create_outcome(ctx, stack_frame, outcome)?
+                        }
+                        FrameResult::EOFCreate(outcome) => {
+                            // return_eofcreate
+                            exec.insert_eofcreate_outcome(ctx, stack_frame, outcome)?
                         }
                     }
                 }
@@ -352,7 +381,7 @@ impl<EXT, DB: Database> Evm<'_, EXT, DB> {
                 ctx,
                 CallInputs::new_boxed(&ctx.evm.env.tx, gas_limit).unwrap(),
             )?,
-            TransactTo::Create(_) => exec.create(
+            TransactTo::Create => exec.create(
                 ctx,
                 CreateInputs::new_boxed(&ctx.evm.env.tx, gas_limit).unwrap(),
             )?,
@@ -382,11 +411,12 @@ impl<EXT, DB: Database> Evm<'_, EXT, DB> {
 }
 
 impl<EXT, DB: Database> Host for Evm<'_, EXT, DB> {
-    fn env_mut(&mut self) -> &mut Env {
-        &mut self.context.evm.env
-    }
     fn env(&self) -> &Env {
         &self.context.evm.env
+    }
+
+    fn env_mut(&mut self) -> &mut Env {
+        &mut self.context.evm.env
     }
 
     fn block_hash(&mut self, number: U256) -> Option<B256> {
@@ -397,7 +427,7 @@ impl<EXT, DB: Database> Host for Evm<'_, EXT, DB> {
             .ok()
     }
 
-    fn load_account(&mut self, address: Address) -> Option<(bool, bool)> {
+    fn load_account(&mut self, address: Address) -> Option<LoadAccountResult> {
         self.context
             .evm
             .load_account_exist(address)
